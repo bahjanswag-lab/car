@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>汽配商城 | Toyota/Hyundai/BMW 灯具/保险杠/配件</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <header class="nav">
+    <div class="brand">汽配商城</div>
+    <nav class="nav-actions">
+      <input id="searchInput" class="search" type="search" placeholder="搜索：车型 / 配件名称 / OEM 编号" />
+      <select id="brandFilter" class="select">
+        <option value="">全部品牌</option>
+        <option value="Toyota">Toyota</option>
+        <option value="Hyundai">Hyundai</option>
+        <option value="BMW">BMW</option>
+      </select>
+      <select id="categoryFilter" class="select">
+        <option value="">全部类别</option>
+        <option value="前大灯">前大灯</option>
+        <option value="尾灯">尾灯</option>
+        <option value="保险杠">保险杠</option>
+        <option value="雾灯">雾灯</option>
+      </select>
+
+      <button id="cartBtn" class="cart-btn" aria-label="查看购物车">
+        🛒 <span id="cartCount">0</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- 顶部宣传条 -->
+  <div class="banner">
+    <p>🚚 阿斯塔纳/阿拉木图自提或配送 | 🧾 支持批发价 | ✅ 质保与退换（具体以条款为准）</p>
+  </div>
+
+  <!-- 商品列表 -->
+  <main class="container">
+    <div id="productsGrid" class="grid"></div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div>© 2025 汽配商城 | 微信/WhatsApp: +7 xxx xxx xx xx | Instagram: @yourshop</div>
+    <div>地址：哈萨克斯坦 · 阿斯塔纳（示例） | 营业时间：10:00–19:00</div>
+  </footer>
+
+  <!-- 购物车抽屉 -->
+  <aside id="cartDrawer" class="drawer">
+    <div class="drawer-header">
+      <h3>购物车</h3>
+      <button id="closeCart" class="icon-btn" aria-label="关闭">✖</button>
+    </div>
+    <div id="cartItems" class="drawer-body"></div>
+    <div class="drawer-footer">
+      <div class="total-line">合计：<strong id="cartTotal">0</strong> KZT</div>
+      <button id="checkoutBtn" class="primary">提交询价 / 结算占位</button>
+      <p class="note">当前演示为前端版本：点击“提交询价”会生成一个订单摘要（可复制粘贴到 WhatsApp/Instagram 私信）。</p>
+    </div>
+  </aside>
+
+  <!-- 商品详情模态框（简单版） -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <button id="modalClose" class="icon-btn right">✖</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+:root{
+  --bg:#0b0c10;
+  --card:#151821;
+  --muted:#a8b0c0;
+  --accent:#00d1b2;
+  --line:#242836;
+  --text:#eaf0ff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Microsoft YaHei",sans-serif}
+
+/* 顶部导航 */
+.nav{
+  position:sticky;top:0;z-index:10;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(11,12,16,.8);backdrop-filter:blur(8px)
+}
+.brand{font-weight:800;letter-spacing:.5px}
+.nav-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search,.select{
+  background:#0f1220;border:1px solid var(--line);color:var(--text);
+  padding:10px 12px;border-radius:8px;min-width:200px
+}
+.cart-btn{
+  display:flex;align-items:center;gap:6px;background:var(--accent);border:none;color:#012016;
+  padding:10px 12px;border-radius:8px;font-weight:700;cursor:pointer
+}
+
+/* 横幅 */
+.banner{
+  border-bottom:1px solid var(--line);text-align:center;background:#0f1220;color:var(--muted);
+  padding:8px 10px
+}
+
+/* 布局 */
+.container{padding:18px;max-width:1200px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+
+/* 商品卡片 */
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column
+}
+.thumb{aspect-ratio:4/3;background:#0f1220;display:flex;align-items:center;justify-content:center}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.meta{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.title{font-weight:700;line-height:1.3}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{background:#0f1220;border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:999px;font-size:12px}
+.price-line{display:flex;justify-content:space-between;align-items:center}
+.add-btn{background:#0f1220;border:1px solid var(--accent);color:var(--accent);padding:8px 10px;border-radius:8px;cursor:pointer}
+.add-btn:hover{filter:brightness(1.1)}
+.link{color:var(--muted);font-size:13px;text-decoration:underline;cursor:pointer}
+
+/* 抽屉购物车 */
+.drawer{
+  position:fixed;right:-420px;top:0;height:100vh;width:420px;background:#0f1220;border-left:1px solid var(--line);
+  transition:right .25s ease;display:flex;flex-direction:column
+}
+.drawer.open{right:0}
+.drawer-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.drawer-body{padding:12px 14px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.drawer-item{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;background:#0b0e1a;border:1px solid var(--line);border-radius:8px;padding:8px}
+.drawer-item img{width:64px;height:48px;object-fit:cover;border-radius:6px}
+.qty{display:flex;align-items:center;gap:6px}
+.icon-btn{background:transparent;border:1px solid var(--line);color:var(--text);padding:6px 8px;border-radius:8px;cursor:pointer}
+.right{float:right}
+.drawer-footer{border-top:1px solid var(--line);padding:12px 14px}
+.total-line{margin:6px 0 10px}
+.primary{width:100%;padding:12px;border:none;background:var(--accent);color:#012016;border-radius:10px;font-weight:800;cursor:pointer}
+.note{color:var(--muted);font-size:12px}
+
+/* 模态框 */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}
+.modal.hidden{display:none}
+.modal-card{width:min(720px,96vw);background:#0f1220;border:1px solid var(--line);border-radius:14px;padding:14px}
+
+/* 页脚 */
+.footer{border-top:1px solid var(--line);color:var(--muted);padding:20px 16px;text-align:center}
+/* 简易前端“数据源”（可改成从后端/API读取） */
+const PRODUCTS = [
+  {
+    id: "TY-HL-COR12",
+    name: "前大灯 | Corolla 2012-2013 | 右 | 电调",
+    brand: "Toyota",
+    model: "Corolla E170",
+    category: "前大灯",
+    oem: "81145-02K90",
+    price: 65000,
+    img: "https://picsum.photos/seed/corolla-hl/640/480"
+  },
+  {
+    id: "TY-BMP-CAM15",
+    name: "前保险杠 | Camry 2015-2017 | 含格栅孔",
+    brand: "Toyota",
+    model: "Camry XV50",
+    category: "保险杠",
+    oem: "52119-06B40",
+    price: 95000,
+    img: "https://picsum.photos/seed/camry-bmp/640/480"
+  },
+  {
+    id: "HY-TL-SON18",
+    name: "尾灯 | Sonata 2018-2019 | 左 | LED",
+    brand: "Hyundai",
+    model: "Sonata LF",
+    category: "尾灯",
+    oem: "92401-C2500",
+    price: 78000,
+    img: "https://picsum.photos/seed/sonata-tl/640/480"
+  },
+  {
+    id: "BMW-FOG-F30",
+    name: "雾灯总成 | 3系 F30 2012-2018",
+    brand: "BMW",
+    model: "F30",
+    category: "雾灯",
+    oem: "63177248913",
+    price: 42000,
+    img: "https://picsum.photos/seed/bmw-fog/640/480"
+  }
+];
+
+/* 状态 */
+let state = {
+  query: "",
+  brand: "",
+  category: "",
+  cart: loadCart()
+};
+
+/* DOM */
+const grid = document.getElementById("productsGrid");
+const searchInput = document.getElementById("searchInput");
+const brandFilter = document.getElementById("brandFilter");
+const categoryFilter = document.getElementById("categoryFilter");
+const cartBtn = document.getElementById("cartBtn");
+const cartDrawer = document.getElementById("cartDrawer");
+const cartCount = document.getElementById("cartCount");
+const cartItems = document.getElementById("cartItems");
+const cartTotal = document.getElementById("cartTotal");
+const closeCart = document.getElementById("closeCart");
+const checkoutBtn = document.getElementById("checkoutBtn");
+
+const modal = document.getElementById("modal");
+const modalClose = document.getElementById("modalClose");
+const modalContent = document.getElementById("modalContent");
+
+/* 初始化 */
+renderProducts();
+renderCart();
+
+/* 事件绑定 */
+searchInput.addEventListener("input", (e)=>{ state.query = e.target.value.trim(); renderProducts(); });
+brandFilter.addEventListener("change", (e)=>{ state.brand = e.target.value; renderProducts(); });
+categoryFilter.addEventListener("change", (e)=>{ state.category = e.target.value; renderProducts(); });
+
+cartBtn.addEventListener("click", ()=> cartDrawer.classList.add("open"));
+closeCart.addEventListener("click", ()=> cartDrawer.classList.remove("open"));
+modalClose.addEventListener("click", ()=> modal.classList.add("hidden"));
+modal.addEventListener("click", (e)=>{ if(e.target===modal) modal.classList.add("hidden"); });
+
+checkoutBtn.addEventListener("click", ()=>{
+  const order = Object.values(state.cart).map(it=>`${it.name} x${it.qty} — ${it.price} KZT`).join("\n");
+  const total = getCartTotal();
+  const text = `【汽配商城 询价】\n${order}\n合计：${total} KZT\n客户车型/车架号(VIN)：\n收货城市：\n联系人：\n电话/WhatsApp：`;
+  navigator.clipboard?.writeText(text);
+  alert("已生成询价摘要并复制到剪贴板，直接粘贴到 WhatsApp/Instagram 与我们联系。");
+});
+
+/* 渲染商品 */
+function renderProducts(){
+  const list = PRODUCTS.filter(p=>{
+    const q = state.query.toLowerCase();
+    const hit = !q || [p.name,p.model,p.oem,p.brand,p.category].some(x=>String(x).toLowerCase().includes(q));
+    const brandOk = !state.brand || p.brand===state.brand;
+    const catOk = !state.category || p.category===state.category;
+    return hit && brandOk && catOk;
+  });
+
+  grid.innerHTML = list.map(p=>cardHTML(p)).join("") || emptyHTML();
+
+  // 绑定卡片上的按钮事件
+  document.querySelectorAll("[data-add]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const id = btn.getAttribute("data-add");
+      addToCart(id, 1);
+    });
+  });
+  document.querySelectorAll("[data-detail]").forEach(a=>{
+    a.addEventListener("click",()=>{
+      const id = a.getAttribute("data-detail");
+      showDetail(id);
+    });
+  });
+}
+
+function cardHTML(p){
+  return `
+  <article class="card">
+    <div class="thumb"><img src="${p.img}" alt="${p.name}" loading="lazy"></div>
+    <div class="meta">
+      <div class="title">${p.name}</div>
+      <div class="badges">
+        <span class="badge">${p.brand}</span>
+        <span class="badge">${p.model}</span>
+        <span class="badge">OEM: ${p.oem}</span>
+        <span class="badge">${p.category}</span>
+      </div>
+      <div class="price-line">
+        <strong>${p.price.toLocaleString()} KZT</strong>
+        <button class="add-btn" data-add="${p.id}">加入购物车</button>
+      </div>
+      <div class="link" data-detail="${p.id}">查看详情</div>
+    </div>
+  </article>`;
+}
+
+function emptyHTML(){
+  return `<div style="color:#a8b0c0">未找到结果。试试更换关键词、品牌或类别。</div>`;
+}
+
+/* 详情模态框 */
+function showDetail(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  modalContent.innerHTML = `
+    <h3 style="margin-top:0">${p.name}</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start">
+      <img src="${p.img}" alt="${p.name}" style="width:100%;border-radius:10px;object-fit:cover">
+      <div>
+        <p>品牌：${p.brand}</p>
+        <p>车型：${p.model}</p>
+        <p>类别：${p.category}</p>
+        <p>OEM：${p.oem}</p>
+        <p>价格：<strong>${p.price.toLocaleString()} KZT</strong></p>
+        <button class="add-btn" onclick="addToCart('${p.id}',1)">加入购物车</button>
+      </div>
+    </div>
+  `;
+  modal.classList.remove("hidden");
+}
+
+/* 购物车 */
+function addToCart(id, qty=1){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  if(!state.cart[id]){
+    state.cart[id] = { id:p.id, name:p.name, price:p.price, img:p.img, qty:0 };
+  }
+  state.cart[id].qty += qty;
+  saveCart();
+  renderCart();
+}
+
+function removeFromCart(id){
+  delete state.cart[id];
+  saveCart();
+  renderCart();
+}
+
+function changeQty(id, delta){
+  if(!state.cart[id]) return;
+  state.cart[id].qty += delta;
+  if(state.cart[id].qty <= 0) delete state.cart[id];
+  saveCart();
+  renderCart();
+}
+
+function renderCart(){
+  const items = Object.values(state.cart);
+  cartCount.textContent = items.reduce((s,it)=>s+it.qty,0);
+  cartItems.innerHTML = items.map(it=>`
+    <div class="drawer-item">
+      <img src="${it.img}" alt="${it.name}" />
+      <div>
+        <div style="font-weight:700">${it.name}</div>
+        <div style="color:#a8b0c0">${it.price.toLocaleString()} KZT</div>
+      </div>
+      <div class="qty">
+        <button class="icon-btn" onclick="changeQty('${it.id}',-1)">－</button>
+        <div>${it.qty}</div>
+        <button class="icon-btn" onclick="changeQty('${it.id}',+1)">＋</button>
+        <button class="icon-btn" onclick="removeFromCart('${it.id}')">删除</button>
+      </div>
+    </div>
+  `).join("") || `<div style="color:#a8b0c0">购物车为空</div>`;
+
+  cartTotal.textContent = getCartTotal().toLocaleString();
+}
+
+function getCartTotal(){
+  return Object.values(state.cart).reduce((s,it)=>s+it.price*it.qty,0);
+}
+
+/* 本地存储 */
+function saveCart(){ localStorage.setItem("carparts_cart", JSON.stringify(state.cart)); }
+function loadCart(){ try{ return JSON.parse(localStorage.getItem("carparts_cart")||"{}"); }catch{return{}} }
+
